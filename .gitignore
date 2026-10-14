@@ -1,0 +1,15 @@
+# Build artifacts
+/campus
+/build/
+*.o
+*.obj
+
+# Generated images (keep the folder, ignore the renders)
+/output/*.ppm
+/output/*.png
+/output/*.bmp
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store

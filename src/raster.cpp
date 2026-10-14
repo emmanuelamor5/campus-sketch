@@ -1,0 +1,169 @@
+#include "raster.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace raster {
+
+static int iround(double v) { return static_cast<int>(std::lround(v)); }
+
+void drawLine(Canvas& c, Point a, Point b, Color col) {
+    int x0 = iround(a.x), y0 = iround(a.y);
+    int x1 = iround(b.x), y1 = iround(b.y);
+    int dx = std::abs(x1 - x0), dy = -std::abs(y1 - y0);
+    int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    int err = dx + dy;
+    while (true) {
+        c.setPixel(x0, y0, col);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+}
+
+void drawPolygon(Canvas& c, const Polygon& poly, Color col) {
+    if (poly.size() < 2) return;
+    for (size_t i = 0; i < poly.size(); ++i) {
+        drawLine(c, poly[i], poly[(i + 1) % poly.size()], col);
+    }
+}
+
+void fillPolygon(Canvas& c, const Polygon& poly, Color col) {
+    if (poly.size() < 3) return;
+    double ymin = poly[0].y, ymax = poly[0].y;
+    for (const auto& p : poly) {
+        ymin = std::min(ymin, p.y);
+        ymax = std::max(ymax, p.y);
+    }
+    int yStart = std::max(0, iround(std::ceil(ymin)));
+    int yEnd = std::min(c.height() - 1, iround(std::floor(ymax)));
+
+    std::vector<double> xs;
+    for (int y = yStart; y <= yEnd; ++y) {
+        xs.clear();
+        double sy = y + 0.5;  // sample at pixel center to avoid vertex glitches
+        for (size_t i = 0; i < poly.size(); ++i) {
+            const Point& a = poly[i];
+            const Point& b = poly[(i + 1) % poly.size()];
+            // Does the horizontal scanline cross edge a-b?
+            if ((a.y <= sy && b.y > sy) || (b.y <= sy && a.y > sy)) {
+                double t = (sy - a.y) / (b.y - a.y);
+                xs.push_back(a.x + t * (b.x - a.x));
+            }
+        }
+        std::sort(xs.begin(), xs.end());
+        for (size_t i = 0; i + 1 < xs.size(); i += 2) {
+            int xl = std::max(0, iround(std::ceil(xs[i])));
+            int xr = std::min(c.width() - 1, iround(std::floor(xs[i + 1])));
+            for (int x = xl; x <= xr; ++x) c.setPixel(x, y, col);
+        }
+    }
+}
+
+void drawCircle(Canvas& c, Point center, int radius, Color col) {
+    int cx = iround(center.x), cy = iround(center.y);
+    int x = 0, y = radius, d = 1 - radius;
+    auto plot8 = [&](int px, int py) {
+        c.setPixel(cx + px, cy + py, col);
+        c.setPixel(cx - px, cy + py, col);
+        c.setPixel(cx + px, cy - py, col);
+        c.setPixel(cx - px, cy - py, col);
+        c.setPixel(cx + py, cy + px, col);
+        c.setPixel(cx - py, cy + px, col);
+        c.setPixel(cx + py, cy - px, col);
+        c.setPixel(cx - py, cy - px, col);
+    };
+    while (x <= y) {
+        plot8(x, y);
+        if (d < 0) {
+            d += 2 * x + 3;
+        } else {
+            d += 2 * (x - y) + 5;
+            --y;
+        }
+        ++x;
+    }
+}
+
+void fillCircle(Canvas& c, Point center, int radius, Color col) {
+    int cx = iround(center.x), cy = iround(center.y);
+    int x = 0, y = radius, d = 1 - radius;
+    auto span = [&](int px, int py) {
+        for (int i = cx - px; i <= cx + px; ++i) {
+            c.setPixel(i, cy + py, col);
+            c.setPixel(i, cy - py, col);
+        }
+    };
+    while (x <= y) {
+        span(y, x);  // wide rows
+        span(x, y);  // tall rows
+        if (d < 0) {
+            d += 2 * x + 3;
+        } else {
+            d += 2 * (x - y) + 5;
+            --y;
+        }
+        ++x;
+    }
+}
+
+void fillEllipse(Canvas& c, Point center, int rx, int ry, Color col) {
+    int cx = iround(center.x), cy = iround(center.y);
+    if (rx <= 0 || ry <= 0) return;
+    for (int y = -ry; y <= ry; ++y) {
+        double t = static_cast<double>(y) / ry;
+        double w = rx * std::sqrt(std::max(0.0, 1.0 - t * t));
+        int wi = iround(w);
+        for (int x = -wi; x <= wi; ++x) c.setPixel(cx + x, cy + y, col);
+    }
+}
+
+Point bezierPoint(const Point& p0, const Point& p1, const Point& p2,
+                  const Point& p3, double t) {
+    double u = 1.0 - t;
+    double b0 = u * u * u;
+    double b1 = 3 * u * u * t;
+    double b2 = 3 * u * t * t;
+    double b3 = t * t * t;
+    return {b0 * p0.x + b1 * p1.x + b2 * p2.x + b3 * p3.x,
+            b0 * p0.y + b1 * p1.y + b2 * p2.y + b3 * p3.y};
+}
+
+std::vector<Point> sampleBezier(const Point& p0, const Point& p1,
+                                const Point& p2, const Point& p3,
+                                int segments) {
+    std::vector<Point> out;
+    segments = std::max(1, segments);
+    out.reserve(segments + 1);
+    for (int i = 0; i <= segments; ++i) {
+        out.push_back(bezierPoint(p0, p1, p2, p3, static_cast<double>(i) / segments));
+    }
+    return out;
+}
+
+void drawThickPolyline(Canvas& c, const std::vector<Point>& pts,
+                       double thickness, Color col) {
+    if (pts.empty()) return;
+    int r = std::max(0, iround(thickness / 2.0));
+    for (size_t i = 0; i + 1 < pts.size(); ++i) {
+        drawLine(c, pts[i], pts[i + 1], col);
+    }
+    if (r > 0) {
+        for (const auto& p : pts) fillCircle(c, p, r, col);
+    }
+}
+
+Polygon rectangle(Point center, double length, double width, double angleDeg) {
+    double hl = length / 2.0, hw = width / 2.0;
+    Polygon corners = {
+        {center.x - hl, center.y - hw},
+        {center.x + hl, center.y - hw},
+        {center.x + hl, center.y + hw},
+        {center.x - hl, center.y + hw},
+    };
+    for (auto& p : corners) p = rotateAround(p, center, angleDeg);
+    return corners;
+}
+
+}  // namespace raster

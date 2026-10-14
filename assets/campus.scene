@@ -1,0 +1,48 @@
+# Campus scene digitized from docs/sketchup_top.png
+# ---------------------------------------------------------------------------
+# Coordinates are half-scale pixels from the SketchUp top-down screenshot
+# (1920x970 -> 960x485). Origin top-left, +y downward.
+#
+# Record formats:
+#   CANVAS   width height
+#   VIEWPORT xmin ymin xmax ymax
+#   PAD      name  x1 y1 x2 y2 ...     # white site pad
+#   LAWN     name  x1 y1 x2 y2 ...     # green planters / grass
+#   PARKING  name  x1 y1 x2 y2 ...     # gray plaza
+#   BUILDING name  x1 y1 x2 y2 ...     # footprint polygon
+#   ROAD     name  x0 y0 x1 y1 x2 y2 x3 y3 [w]
+#   TREE     name  x y radius
+#   CAR      name  x y length width angle
+# ---------------------------------------------------------------------------
+
+CANVAS   960 485
+
+# Zoom window over the E-building and planter islands
+VIEWPORT 280 120 560 400
+
+# White site pad (from SketchUp)
+PAD      site_pad    454.0 33.5  166.5 197.5  200.0 303.0  275.5 425.0  525.0 425.0  525.0 290.0
+
+# Gray paved plaza (left of the building)
+PARKING  plaza       166.5 197.0  201.5 306.5  258.5 398.0  297.0 425.0  401.0 425.0  308.0 283.0  312.0 260.5  243.0 149.5
+
+# Green planter islands (capsule polygons traced from the SketchUp ovals)
+LAWN     planter_n   221.5 199.5  266.0 294.5  274.0 296.5  276.5 289.5  230.5 201.5
+LAWN     planter_s   283.0 316.5  281.0 323.0  316.0 390.5  326.5 396.5  328.5 390.0  291.0 318.0
+
+# E-shaped building footprint (outer silhouette traced from SketchUp)
+BUILDING e_bldg      380.5 139.0  348.0 154.5  356.5 180.5  302.0 209.0  329.5 263.5  328.0 280.0  335.0 292.5  344.0 293.0  369.5 341.5  478.5 286.0  466.0 266.5  382.5 305.0  369.5 273.0  446.5 230.0  431.5 206.0  350.5 244.0  343.5 222.5  423.5 180.5  410.0 152.5  390.0 158.0
+
+# Soft access path along the plaza edge (cubic Bezier)
+ROAD     access      200 210  260 280  320 360  390 420   10
+
+# Symbolic trees near the site (2D canopy symbols — design decision)
+TREE     t1   200 160  12
+TREE     t2   540 200  14
+TREE     t3   560 360  11
+TREE     t4   180 360  10
+
+# Cars along the plaza (rotated rectangles — design decision)
+CAR      c1  250 340  28 12  -28
+CAR      c2  275 370  28 12  -28
+CAR      c3  300 400  28 12  -28

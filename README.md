@@ -115,7 +115,7 @@ ignored.
 
 ## Getting data out of SketchUp Web
 
-1. Put cars and trees on their own tag and hide it.
+1. Hide cars and trees.
 2. Take a **top-down, parallel-projection** screenshot of the full campus;
    save it as `docs/sketchup_top.png` and treat its pixel grid as your
    coordinate system.

@@ -29,6 +29,25 @@ void drawPolygon(Canvas& c, const Polygon& poly, Color col) {
     }
 }
 
+// Scanline polygon fill, even-odd rule.
+//
+// For every pixel row inside the polygon's y-range we cast a horizontal ray,
+// collect the x where it crosses each edge, sort them, and fill between
+// crossings in pairs: [x0,x1], [x2,x3], ... Walking left to right, each
+// crossing toggles inside/outside, so no convexity assumption is needed.
+//
+// The E-building shows why this matters: a row through the arms crosses the
+// outline 4 or 6 times (spine left edge, then the left and right side of each
+// arm it hits). Sorting gives spans like [spine..arm tip] [next arm..tip], and
+// the gaps between pairs are exactly the concave notches between the arms,
+// which stay unfilled. The same holds for the step on the spine and the notch
+// beside the top tab.
+//
+// Vertex handling: the half-open test (one endpoint <= sy, the other > sy)
+// counts a vertex shared by two edges once when the outline passes through
+// it, and zero or two times at a local min/max, so the crossing count per row
+// is always even. Horizontal edges never satisfy the test and are skipped;
+// the edges around them supply the span ends.
 void fillPolygon(Canvas& c, const Polygon& poly, Color col) {
     if (poly.size() < 3) return;
     double ymin = poly[0].y, ymax = poly[0].y;
@@ -36,23 +55,27 @@ void fillPolygon(Canvas& c, const Polygon& poly, Color col) {
         ymin = std::min(ymin, p.y);
         ymax = std::max(ymax, p.y);
     }
+    // Only visit rows that are both inside the polygon and on the canvas.
     int yStart = std::max(0, iround(std::ceil(ymin)));
     int yEnd = std::min(c.height() - 1, iround(std::floor(ymax)));
 
-    std::vector<double> xs;
+    std::vector<double> xs;  // reused across rows to avoid reallocating
     for (int y = yStart; y <= yEnd; ++y) {
         xs.clear();
         double sy = y + 0.5;  // sample at pixel center to avoid vertex glitches
         for (size_t i = 0; i < poly.size(); ++i) {
             const Point& a = poly[i];
             const Point& b = poly[(i + 1) % poly.size()];
-            // Does the horizontal scanline cross edge a-b?
+            // Does the horizontal scanline cross edge a-b? (half-open in y)
             if ((a.y <= sy && b.y > sy) || (b.y <= sy && a.y > sy)) {
+                // Linear interpolation along the edge gives the crossing x.
                 double t = (sy - a.y) / (b.y - a.y);
                 xs.push_back(a.x + t * (b.x - a.x));
             }
         }
         std::sort(xs.begin(), xs.end());
+        // Fill inside spans only: pairs (0,1), (2,3), ... Each span covers the
+        // integer x in [ceil(left), floor(right)], clamped to the canvas.
         for (size_t i = 0; i + 1 < xs.size(); i += 2) {
             int xl = std::max(0, iround(std::ceil(xs[i])));
             int xr = std::min(c.width() - 1, iround(std::floor(xs[i + 1])));

@@ -30,8 +30,13 @@ PARKING  plaza       166.5 197.0  201.5 306.5  258.5 398.0  297.0 425.0  401.0 4
 LAWN     planter_n   221.5 199.5  266.0 294.5  274.0 296.5  276.5 289.5  230.5 201.5
 LAWN     planter_s   283.0 316.5  281.0 323.0  316.0 390.5  326.5 396.5  328.5 390.0  291.0 318.0
 
-# E-shaped building footprint (outer silhouette traced from SketchUp)
-BUILDING e_bldg      380.5 139.0  348.0 154.5  356.5 180.5  302.0 209.0  329.5 263.5  328.0 280.0  335.0 292.5  344.0 293.0  369.5 341.5  478.5 286.0  466.0 266.5  382.5 305.0  369.5 273.0  446.5 230.0  431.5 206.0  350.5 244.0  343.5 222.5  423.5 180.5  410.0 152.5  390.0 158.0
+# E-shaped building footprint (outer silhouette traced from SketchUp).
+# Corners are intersections of straight lines least-squares fitted to the
+# outline pixels of each SketchUp edge, then halved and rounded to 0.5 px.
+# Order: top tab -> left spine (with the small entrance step) -> bottom arm
+# -> middle arm -> top arm -> back to the tab. Concave notches between the
+# arms are handled by the even-odd scanline fill.
+BUILDING e_bldg      379.5 139.5  348.5 155.5  361.0 179.0  302.5 210.0  333.5 269.5  325.5 272.5  336.0 292.0  342.5 288.5  370.5 341.0  478.0 285.0  468.0 267.0  384.0 310.5  365.5 274.0  446.0 231.5  433.5 206.5  352.0 248.5  339.5 223.5  423.0 180.5  409.0 153.0  391.0 162.0
 
 # Soft access path along the plaza edge (cubic Bezier)
 ROAD     access      200 210  260 280  320 360  390 420   10

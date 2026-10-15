@@ -77,6 +77,10 @@ line, fill, curve, and clipping code.
 | Zoom / polygon clip | Sutherland–Hodgman | `src/clipping.cpp` |
 | Scene input | Plain-text scene loader | `src/scene.cpp` |
 
+- Lines / circles / cars — @derrickkimutai1: Bresenham lines (integer error
+  term, all octants), midpoint-circle tree canopies with an offset shadow
+  ellipse, and cars as rotated rectangles parked in the plaza's painted stalls.
+
 **Design decision (unchanged):** cars and trees stay simplified 2D symbols
 (rotated rectangles and filled circles). Phase 1 is about the 2D graphics
 pipeline; real 3D vehicles and vegetation belong to later SketchUp phases.

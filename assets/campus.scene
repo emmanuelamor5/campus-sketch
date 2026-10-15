@@ -65,12 +65,18 @@ ROAD     access      410 420  440 350  520 340  495 250   8
 ROAD     north_walk  265 175  310 110  430 100  470 150   6
 
 # Symbolic trees near the site (2D canopy symbols — design decision)
-TREE     t1   200 160  12
-TREE     t2   540 200  14
-TREE     t3   560 360  11
-TREE     t4   180 360  10
+# Placed on the grass just outside the pad edges, clear of the black road
+# band on the left of the SketchUp view.
+TREE     t1   205 158  12
+TREE     t2   515 140  13
+TREE     t3   552 330  11
+TREE     t4   148 300  10
 
-# Cars along the plaza (rotated rectangles — design decision)
-CAR      c1  250 340  28 12  -28
-CAR      c2  275 370  28 12  -28
-CAR      c3  300 400  28 12  -28
+# Cars parked nose-in to the painted stalls on the building side of the
+# plaza (stall lines at SketchUp y ~ 420-507 full scale). Stalls are ~14 px
+# deep and ~7 px wide here, so cars are 12 x 5.5 with small angle jitter;
+# stall 2 and 5 are left empty.
+CAR      c1  276.0 213.5  12 5.5   0
+CAR      c2  285.0 228.0  12 5.5  -3
+CAR      c3  290.0 236.5  12 5.5   2
+CAR      c4  298.5 250.0  12 5.5   0

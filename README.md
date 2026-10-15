@@ -107,6 +107,22 @@ These map to the proposal’s graphics themes (polygons, lines, ellipses,
 transforms, viewing/clipping) while Phase 2+ move into fuller 3D SketchUp
 modelling, materials, and interaction.
 
+### Scanline fill / buildings — @derrickkimutai1
+
+`fillPolygon` uses the **even-odd scanline** rule. For each pixel row it
+intersects a horizontal line through the pixel centre (`y + 0.5`) with every
+edge, sorts the crossing x values, and fills between pairs
+`[x0,x1]`, `[x2,x3]`, …. Because inside and outside simply alternate, concave
+shapes need no special case. A row through the E-building's arms produces 4–6
+crossings, and the gaps between pairs are the notches between the arms. The
+half-open edge test (`a.y <= y < b.y`) counts shared vertices once and skips
+horizontal edges.
+
+The `e_bldg` footprint in `assets/campus.scene` was re-traced from
+`docs/sketchup_top.png`. Each corner is where two lines meet, each line fitted
+by least squares to the outline pixels of one SketchUp edge, then converted to
+half-scale scene coordinates.
+
 ## Project layout
 
 ```

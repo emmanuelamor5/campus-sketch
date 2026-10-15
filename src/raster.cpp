@@ -7,18 +7,28 @@ namespace raster {
 
 static int iround(double v) { return static_cast<int>(std::lround(v)); }
 
+// Bresenham's line algorithm (integer-only, all octants).
+//
+// Steps one pixel at a time from (x0,y0) to (x1,y1). `err` tracks how far
+// the pixel path has drifted from the ideal line, scaled by 2 to stay in
+// integers. Each step looks at e2 = 2*err:
+//   e2 >= dy -> the line has advanced enough in x: step x
+//   e2 <= dx -> the line has advanced enough in y: step y
+// Both can fire in one iteration (a diagonal step). Using signed steps
+// sx/sy and a negative dy covers every octant with one loop, with no
+// separate steep/shallow cases.
 void drawLine(Canvas& c, Point a, Point b, Color col) {
     int x0 = iround(a.x), y0 = iround(a.y);
     int x1 = iround(b.x), y1 = iround(b.y);
     int dx = std::abs(x1 - x0), dy = -std::abs(y1 - y0);
     int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-    int err = dx + dy;
+    int err = dx + dy;  // error term for the first step
     while (true) {
         c.setPixel(x0, y0, col);
         if (x0 == x1 && y0 == y1) break;
         int e2 = 2 * err;
-        if (e2 >= dy) { err += dy; x0 += sx; }
-        if (e2 <= dx) { err += dx; y0 += sy; }
+        if (e2 >= dy) { err += dy; x0 += sx; }  // step in x
+        if (e2 <= dx) { err += dx; y0 += sy; }  // step in y
     }
 }
 
@@ -61,9 +71,19 @@ void fillPolygon(Canvas& c, const Polygon& poly, Color col) {
     }
 }
 
+// Midpoint circle algorithm (Bresenham's circle). Used for tree canopy rims.
+//
+// Walks one octant only, from (0, r) going right until x > y, and mirrors
+// each point into the other seven octants with plot8. At every step it
+// chooses between moving east (x+1, y) or south-east (x+1, y-1) by testing
+// whether the midpoint between those two pixels is inside the circle:
+//   d < 0  -> midpoint inside, stay on this row:  d += 2x + 3
+//   d >= 0 -> midpoint outside, drop a row:        d += 2(x - y) + 5
+// d starts at 1 - r (the integer form of 5/4 - r), so everything stays in
+// integer arithmetic.
 void drawCircle(Canvas& c, Point center, int radius, Color col) {
     int cx = iround(center.x), cy = iround(center.y);
-    int x = 0, y = radius, d = 1 - radius;
+    int x = 0, y = radius, d = 1 - radius;  // d = decision variable
     auto plot8 = [&](int px, int py) {
         c.setPixel(cx + px, cy + py, col);
         c.setPixel(cx - px, cy + py, col);
@@ -86,9 +106,17 @@ void drawCircle(Canvas& c, Point center, int radius, Color col) {
     }
 }
 
+// Filled disk from the same midpoint circle walk (tree canopies).
+//
+// Instead of plotting the 8 symmetric points, each octant point (x, y) is
+// turned into horizontal spans between its mirrored left and right points.
+// span(y, x) fills the wide rows near the middle and span(x, y) the short
+// rows near the top and bottom, so every row of the disk is filled with no
+// gaps and no sqrt.
 void fillCircle(Canvas& c, Point center, int radius, Color col) {
     int cx = iround(center.x), cy = iround(center.y);
     int x = 0, y = radius, d = 1 - radius;
+    // Fill the row from cx - px to cx + px at cy + py and at cy - py.
     auto span = [&](int px, int py) {
         for (int i = cx - px; i <= cx + px; ++i) {
             c.setPixel(i, cy + py, col);
@@ -154,6 +182,14 @@ void drawThickPolyline(Canvas& c, const std::vector<Point>& pts,
     }
 }
 
+// Car symbol: rotated rectangle (2D rotation transform).
+//
+// Build the four corners of an axis-aligned length x width box around
+// `center`, then rotate each corner about the center by angleDeg with
+// x' = cx + dx*cos - dy*sin,  y' = cy + dx*sin + dy*cos.
+// With +y pointing down, a positive angle turns the car clockwise on screen.
+// The result is a normal polygon, so it can be clipped, filled by the
+// scanline fill and outlined with Bresenham lines.
 Polygon rectangle(Point center, double length, double width, double angleDeg) {
     double hl = length / 2.0, hw = width / 2.0;
     Polygon corners = {

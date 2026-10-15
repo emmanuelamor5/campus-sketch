@@ -77,6 +77,10 @@ line, fill, curve, and clipping code.
 | Zoom / polygon clip | Sutherland–Hodgman | `src/clipping.cpp` |
 | Scene input | Plain-text scene loader | `src/scene.cpp` |
 
+- Lines / circles / cars — @derrickkimutai1: Bresenham lines (integer error
+  term, all octants), midpoint-circle tree canopies with an offset shadow
+  ellipse, and cars as rotated rectangles parked in the plaza's painted stalls.
+
 These map to the proposal’s graphics themes (polygons, lines, ellipses,
 transforms, viewing/clipping) while Phase 2+ move into fuller 3D SketchUp
 modelling, materials, and interaction.

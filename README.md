@@ -81,6 +81,24 @@ line, fill, curve, and clipping code.
   term, all octants), midpoint-circle tree canopies with an offset shadow
   ellipse, and cars as rotated rectangles parked in the plaza's painted stalls.
 
+### Clipping / zoom — @joekarogo
+
+The zoom view (`output/campus_zoom.ppm`) re-renders the scene through the
+`VIEWPORT` window, `190 190 510 351.67`. That window covers the E-building and the
+plaza edge, and the full view outlines it in blue.
+
+- **Road segments** are clipped with **Cohen–Sutherland**. Each endpoint gets
+  a 4-bit outcode, so segments fully inside or fully outside are settled
+  with two bit tests. The rest are trimmed to the window edges one at a time.
+- **Pads, lawns, parking, buildings and cars** are clipped with
+  **Sutherland–Hodgman**. The polygon passes through the left, right, bottom
+  and top edges in turn, and each stage keeps the inside vertices and adds
+  the edge crossings. This also handles the concave E footprint.
+- The window has the same 960:485 aspect ratio as the canvas, so mapping it
+  onto the canvas is a uniform **3×** zoom with no stretching. In the zoom
+  image, the window edges visibly cut the E's top wing, the site pad, the
+  plaza and a parked car.
+
 These map to the proposal’s graphics themes (polygons, lines, ellipses,
 transforms, viewing/clipping) while Phase 2+ move into fuller 3D SketchUp
 modelling, materials, and interaction.

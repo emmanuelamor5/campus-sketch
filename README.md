@@ -72,7 +72,7 @@ line, fill, curve, and clipping code.
 | Building / pad / lawn / parking fill | Scanline polygon fill (even-odd) | `src/raster.cpp` |
 | Tree canopy | Midpoint circle + offset shadow ellipse | `src/raster.cpp` |
 | Car | Rotated-rectangle polygon transform | `src/raster.cpp` |
-| Curved road / path | Cubic Bézier sampling, thickened stroke | `src/raster.cpp` |
+| Bézier roads / scene file — @RichardJesse | Cubic Bézier sampled at 60 points, each chord clipped then stroked with a Bresenham centerline + round joints; roads read from `ROAD` lines in the scene file | `src/raster.cpp`, `assets/campus.scene` |
 | Zoom / line clip | Cohen–Sutherland | `src/clipping.cpp` |
 | Zoom / polygon clip | Sutherland–Hodgman | `src/clipping.cpp` |
 | Scene input | Plain-text scene loader | `src/scene.cpp` |
@@ -80,6 +80,10 @@ line, fill, curve, and clipping code.
 - Lines / circles / cars — @derrickkimutai1: Bresenham lines (integer error
   term, all octants), midpoint-circle tree canopies with an offset shadow
   ellipse, and cars as rotated rectangles parked in the plaza's painted stalls.
+
+**Design decision (unchanged):** cars and trees stay simplified 2D symbols
+(rotated rectangles and filled circles). Phase 1 is about the 2D graphics
+pipeline; real 3D vehicles and vegetation belong to later SketchUp phases.
 
 ### Clipping / zoom — @joekarogo
 
@@ -170,10 +174,16 @@ PAD      site_pad  454 34  166 198  200 303  276 425  525 425  525 290
 LAWN     planter   222 200  266 295  274 297  277 290  230 202
 PARKING  plaza     166 197  202 307  258 398  297 425  401 425
 BUILDING e_bldg    380 139  348 154  ...      # footprint (see campus.scene)
-ROAD     access    200 210 260 280 320 360 390 420  10
+ROAD     access    410 420 440 350 520 340 495 250  8   # cubic Bezier
 TREE     t1        200 160 12
 CAR      c1        250 340 28 12 -28
 ```
+
+**Adding a road.** `ROAD name x0 y0 x1 y1 x2 y2 x3 y3 [width]` is a cubic
+Bézier: the curve starts at P0, ends at P3, and is pulled toward the handles
+P1 and P2 (it does not pass through them). Roads are painted before parking and
+buildings, so keep them on the pad/lawn or they are hidden. The header of
+`assets/campus.scene` has a worked example.
 
 `assets/campus.scene` was digitized from `docs/sketchup_top.png` (half-scale
 pixel coordinates). Lines beginning with `#`, and inline `# ...` comments, are

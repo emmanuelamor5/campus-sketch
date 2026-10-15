@@ -147,6 +147,12 @@ void fillEllipse(Canvas& c, Point center, int rx, int ry, Color col) {
     }
 }
 
+// Cubic Bezier in Bernstein form:
+//   B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + 3(1-t) t^2 P2 + t^3 P3,  t in [0, 1]
+// P0/P3 are the endpoints (the curve passes through them); P1/P2 are control
+// points that only pull the curve toward them (the "handles"). The four
+// weights b0..b3 always sum to 1, so every sample is a convex blend of the
+// control points and stays inside their hull.
 Point bezierPoint(const Point& p0, const Point& p1, const Point& p2,
                   const Point& p3, double t) {
     double u = 1.0 - t;
@@ -158,6 +164,10 @@ Point bezierPoint(const Point& p0, const Point& p1, const Point& p2,
             b0 * p0.y + b1 * p1.y + b2 * p2.y + b3 * p3.y};
 }
 
+// Flatten the curve into a polyline of `segments + 1` points by evaluating
+// B(t) at uniform steps t = i / segments (i = 0..segments). Uniform t is not
+// uniform arc length, but at 60 samples the chords are short enough that the
+// result looks smooth and Cohen-Sutherland can clip each chord independently.
 std::vector<Point> sampleBezier(const Point& p0, const Point& p1,
                                 const Point& p2, const Point& p3,
                                 int segments) {
@@ -170,6 +180,13 @@ std::vector<Point> sampleBezier(const Point& p0, const Point& p1,
     return out;
 }
 
+// Thick stroke built from a 1-px Bresenham centerline plus round "joints":
+//   1. drawLine() joins each pair of consecutive samples.
+//   2. A filled circle of radius thickness/2 is stamped on every sample.
+// The circles widen the line to `thickness` pixels and also fill the wedge
+// gaps that appear on the outside of a bend. main.cpp passes ONE short chord
+// (2 points) per call after clipping it, so each call stamps circles at both
+// ends; neighbouring chords overlap there and the stroke stays continuous.
 void drawThickPolyline(Canvas& c, const std::vector<Point>& pts,
                        double thickness, Color col) {
     if (pts.empty()) return;

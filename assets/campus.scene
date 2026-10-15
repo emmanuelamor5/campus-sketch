@@ -10,9 +10,24 @@
 #   LAWN     name  x1 y1 x2 y2 ...     # green planters / grass
 #   PARKING  name  x1 y1 x2 y2 ...     # gray plaza
 #   BUILDING name  x1 y1 x2 y2 ...     # footprint polygon
-#   ROAD     name  x0 y0 x1 y1 x2 y2 x3 y3 [w]
+#   ROAD     name  x0 y0 x1 y1 x2 y2 x3 y3 [w]   # cubic Bezier + width
 #   TREE     name  x y radius
 #   CAR      name  x y length width angle
+#
+# How to add a ROAD (cubic Bezier path)
+#   ROAD  name  x0 y0  x1 y1  x2 y2  x3 y3  [width]
+#   - (x0,y0) start and (x3,y3) end: the road passes exactly through these.
+#   - (x1,y1) and (x2,y2) are control "handles": the road leaves the start
+#     heading toward P1 and arrives at the end coming from P2. Pull a handle
+#     farther away for a rounder bend; put both on the start-end line for a
+#     straight road.
+#   - width is in scene pixels (default thickness is used if omitted).
+#   Example: a path that leaves (400,420) heading up, bows right, and ends at
+#   (500,250):
+#     ROAD  my_path  400 420  430 340  520 340  500 250  8
+#   Tips: roads are painted BEFORE parking/buildings, so a road drawn over a
+#   PARKING plaza or BUILDING is hidden. Keep roads on the PAD (white) or lawn
+#   and read coordinates off docs/sketchup_top.png (half scale).
 # ---------------------------------------------------------------------------
 
 CANVAS   960 485
@@ -35,8 +50,14 @@ LAWN     planter_s   283.0 316.5  281.0 323.0  316.0 390.5  326.5 396.5  328.5 3
 # E-shaped building footprint (outer silhouette traced from SketchUp)
 BUILDING e_bldg      380.5 139.0  348.0 154.5  356.5 180.5  302.0 209.0  329.5 263.5  328.0 280.0  335.0 292.5  344.0 293.0  369.5 341.5  478.5 286.0  466.0 266.5  382.5 305.0  369.5 273.0  446.5 230.0  431.5 206.0  350.5 244.0  343.5 222.5  423.5 180.5  410.0 152.5  390.0 158.0
 
-# Soft access path along the plaza edge (cubic Bezier)
-ROAD     access      200 210  260 280  320 360  390 420   10
+# Curved access path (cubic Bezier). Leaves the plaza's south end, bows around
+# the south tip of the E-building and ends east of it, so the bend is clearly
+# visible on the white pad (roads sit under the plaza/building in paint order).
+ROAD     access      410 420  440 350  520 340  495 250   8
+
+# Second path: from the plaza's north edge, arcing over the top of the building
+# to the east side of the pad.
+ROAD     north_walk  265 175  310 110  430 100  470 150   6
 
 # Symbolic trees near the site (2D canopy symbols — design decision)
 # Placed on the grass just outside the pad edges, clear of the black road

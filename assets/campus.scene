@@ -1,5 +1,4 @@
 # Campus scene digitized from docs/sketchup_top.png
-# ---------------------------------------------------------------------------
 # Coordinates are half-scale pixels from the SketchUp top-down screenshot
 # (1920x970 -> 960x485). Origin top-left, +y downward.
 #
@@ -28,7 +27,7 @@
 #   Tips: roads are painted BEFORE parking/buildings, so a road drawn over a
 #   PARKING plaza or BUILDING is hidden. Keep roads on the PAD (white) or lawn
 #   and read coordinates off docs/sketchup_top.png (half scale).
-# ---------------------------------------------------------------------------
+
 
 CANVAS   960 485
 
@@ -64,7 +63,7 @@ ROAD     access      410 420  440 350  520 340  495 250   8
 # to the east side of the pad.
 ROAD     north_walk  265 175  310 110  430 100  470 150   6
 
-# Symbolic trees near the site (2D canopy symbols — design decision)
+# Symbolic trees near the site (2D canopy symbols - design decision)
 # Placed on the grass just outside the pad edges, clear of the black road
 # band on the left of the SketchUp view.
 TREE     t1   205 158  12

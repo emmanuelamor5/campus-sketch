@@ -2,7 +2,7 @@
 
 namespace clipping {
 
-// ---------------------------------------------------------------------------
+
 // Cohen-Sutherland line clipping
 //
 // Each endpoint gets a 4-bit "outcode" saying which side(s) of the window it
@@ -19,7 +19,7 @@ namespace clipping {
 // Otherwise pick an endpoint that is outside, slide it along the segment onto
 // the edge its outcode names, recompute its outcode and repeat. Each pass
 // clears at least one bit, so the loop runs at most four times.
-// ---------------------------------------------------------------------------
+
 
 namespace {
 constexpr int INSIDE = 0, LEFT = 1, RIGHT = 2, BOTTOM = 4, TOP = 8;
@@ -65,7 +65,7 @@ bool clipLine(const Rect& w, Point& a, Point& b) {
     }
 }
 
-// ---------------------------------------------------------------------------
+
 // Sutherland-Hodgman polygon clipping
 //
 // The window is the intersection of four half-planes (x >= xmin, x <= xmax,
@@ -83,7 +83,7 @@ bool clipLine(const Rect& w, Point& a, Point& b) {
 // separate pieces comes back as one polygon whose pieces are joined by
 // zero-width edges running along the window border. That is harmless for the
 // even-odd scanline fill.
-// ---------------------------------------------------------------------------
+
 
 namespace {
 enum class Edge { Left, Right, Bottom, Top };

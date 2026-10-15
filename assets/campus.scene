@@ -32,8 +32,10 @@
 
 CANVAS   960 485
 
-# Zoom window over the E-building and planter islands
-VIEWPORT 280 120 560 400
+# Zoom window over the E-building and the plaza edge. 320 x 161.67 has the
+# same aspect as the 960 x 485 canvas, so the zoom is a uniform 3x (no
+# stretching). Edges deliberately cut the E's top wing, the pad and a car.
+VIEWPORT 190 190 510 351.67
 
 # White site pad (from SketchUp)
 PAD      site_pad    454.0 33.5  166.5 197.5  200.0 303.0  275.5 425.0  525.0 425.0  525.0 290.0

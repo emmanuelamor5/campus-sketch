@@ -1,3 +1,11 @@
+# CampusView 3D - interactive browser viewer
+
+The browser viewer uses the latest campus CAD export with orbit controls, viewpoints, a guided tour, location cards and a mini-map. The original C++ Phase 1 work is retained below.
+
+See [viewer setup, model details and GitHub Pages deployment](web/README.md). Preview: python -m http.server 8080 --directory web, then open http://localhost:8080.
+
+---
+
 # CampusView 3D - Phase 1
 
 **An Interactive Virtual Campus Tour** (Computer Graphics group project)

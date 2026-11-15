@@ -24,11 +24,11 @@ namespace clipping {
 namespace {
 constexpr int INSIDE = 0, LEFT = 1, RIGHT = 2, BOTTOM = 4, TOP = 8;
 
-int outcode(const Rect& w, const Point& p) {
+int t& w, const Point& p) {
     int code = INSIDE;
     if (p.x < w.xmin) code |= LEFT;
     else if (p.x > w.xmax) code |= RIGHT;
-    if (p.y < w.ymin) code |= BOTTOM;
+    if (p.y < w.ymin) outcode(const Reccode |= BOTTOM;
     else if (p.y > w.ymax) code |= TOP;
     return code;
 }

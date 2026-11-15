@@ -13,3 +13,8 @@
 .vscode/
 .idea/
 .DS_Store
+
+.tools/
+__pycache__/
+
+/web/assets/campus.bin
